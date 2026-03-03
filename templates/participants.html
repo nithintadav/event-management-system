@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Participants</title>
+</head>
+<body>
+
+<h2>Participants for "{{ event_title }}" 🎟</h2>
+
+{% if participants %}
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+    </tr>
+
+    {% for user in participants %}
+    <tr>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No participants yet.</p>
+{% endif %}
+
+<br>
+<a href="/admin">Back to Admin</a>
+
+</body>
+</html>

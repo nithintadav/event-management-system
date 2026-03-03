@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel</title>
+    <style>
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+            padding: 8px;
+        }
+        .delete-btn {
+            color: red;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Welcome Admin {{ name }} 👑</h2>
+<a href="/create_event">➕ Create Event</a>
+<hr>
+
+<h3>Registered Users</h3>
+<h3>System Statistics 📊</h3>
+<p><b>Total Users:</b> {{ total_users }}</p>
+<p><b>Total Admins:</b> {{ total_admins }}</p>
+<p><b>Total Normal Users:</b> {{ total_normal_users }}</p>
+<hr>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Action</th>
+    </tr>
+
+    {% for user in users %}
+    <tr>
+        <td>{{ user.id }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td>
+            {% if user.role != 'admin' %}
+                <a class="delete-btn" href="/delete_user/{{ user.id }}">Delete</a>
+            {% else %}
+                Protected
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table><br><br>
+<hr>
+<h3>Events List 🎟</h3>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Date</th>
+        <th>Location</th>
+        <th>participants</th>
+    </tr>
+
+    {% for event in events %}
+    <tr>
+        <td>{{ event.id }}</td>
+        <td>{{ event.title }}</td>
+        <td>{{ event.event_date }}</td>
+        <td>{{ event.location }}</td>
+        <td>
+            <a href="/participants/{{ event.id }}">View Participants</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+<a href="/logout">Logout</a>
+
+</body>
+</html>

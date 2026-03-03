@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Bookings</title>
+</head>
+<body>
+
+<h2>My Registered Events 🎟</h2>
+
+{% if bookings %}
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Date</th>
+        <th>Location</th>
+        <th>Action</th>
+    </tr>
+
+    {% for event in bookings %}
+    <tr>
+        <td>{{ event.title }}</td>
+        <td>{{ event.description }}</td>
+        <td>{{ event.event_date }}</td>
+        <td>{{ event.location }}</td>
+        <td>
+            <a href="/cancel_booking/{{ event.booking_id }}">Cancel</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>You have not registered for any events yet.</p>
+{% endif %}
+
+<br>
+<a href="/dashboard">Back to Dashboard</a>
+
+</body>
+</html>
