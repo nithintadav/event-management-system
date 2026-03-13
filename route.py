@@ -17,7 +17,7 @@ def get_db():
 # ---------------- HOME ----------------
 @app.route('/')
 def home():
-    return redirect('/login')
+    return render_template("index.html")
 
 # ---------------- REGISTER ----------------
 @app.route('/register', methods=['GET', 'POST'])

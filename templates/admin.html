@@ -10,20 +10,52 @@
 
 </head>
 
-<body class="bg-light">
+<body>
 
-<div class="container mt-4">
+<div class="container-fluid">
 
-<h2 class="mb-4">Admin Dashboard</h2>
+<div class="row">
 
-<!-- Statistics Cards -->
+<!-- Sidebar -->
+
+<div class="col-md-2 bg-dark text-white min-vh-100 p-3">
+
+<h4 class="mb-4">Admin Panel</h4>
+
+<ul class="nav flex-column">
+
+<li class="nav-item mb-2">
+<a class="nav-link text-white" href="/admin">Dashboard</a>
+</li>
+
+<li class="nav-item mb-2">
+<a class="nav-link text-white" href="/create_event">Create Event</a>
+</li>
+
+<li class="nav-item mb-2">
+<a class="nav-link text-white" href="/events">Events</a>
+</li>
+
+<li class="nav-item mb-2">
+<a class="nav-link text-white" href="/logout">Logout</a>
+</li>
+
+</ul>
+
+</div>
+
+<!-- Main Content -->
+
+<div class="col-md-10 p-4">
+
+<h3 class="mb-4">System Statistics</h3>
 
 <div class="row mb-4">
 
 <div class="col-md-3">
 <div class="card text-white bg-primary shadow">
 <div class="card-body">
-<h5>Total Users</h5>
+<h6>Total Users</h6>
 <h3>{{ total_users }}</h3>
 </div>
 </div>
@@ -32,7 +64,7 @@
 <div class="col-md-3">
 <div class="card text-white bg-success shadow">
 <div class="card-body">
-<h5>Total Admins</h5>
+<h6>Total Admins</h6>
 <h3>{{ total_admins }}</h3>
 </div>
 </div>
@@ -41,7 +73,7 @@
 <div class="col-md-3">
 <div class="card text-white bg-warning shadow">
 <div class="card-body">
-<h5>Normal Users</h5>
+<h6>Normal Users</h6>
 <h3>{{ total_normal_users }}</h3>
 </div>
 </div>
@@ -50,7 +82,7 @@
 <div class="col-md-3">
 <div class="card text-white bg-dark shadow">
 <div class="card-body">
-<h5>Total Events</h5>
+<h6>Total Events</h6>
 <h3>{{ total_events }}</h3>
 </div>
 </div>
@@ -58,13 +90,7 @@
 
 </div>
 
-<!-- Create Event Button -->
-
-<a href="/create_event" class="btn btn-success mb-3">Create Event</a>
-
 <hr>
-
-<!-- Users Table -->
 
 <h4>Users</h4>
 
@@ -85,21 +111,21 @@
 <td>{{ user.name }}</td>
 <td>{{ user.email }}</td>
 <td>{{ user.role }}</td>
+
 <td>
-{% if user.role != 'admin' %}
-<a href="/delete_user/{{ user.id }}" class="btn btn-danger btn-sm">Delete</a>
-{% else %}
-<span class="badge bg-secondary">Protected</span>
+
+{% if user.role != 'admin' %} <a href="/delete_user/{{ user.id }}" class="btn btn-danger btn-sm">Delete</a>
+{% else %} <span class="badge bg-secondary">Protected</span>
 {% endif %}
+
 </td>
+
 </tr>
 {% endfor %}
 
 </table>
 
 <hr>
-
-<!-- Events Table -->
 
 <h4>Events</h4>
 
@@ -121,20 +147,23 @@
 <td>{{ event.title }}</td>
 <td>{{ event.event_date }}</td>
 <td>{{ event.location }}</td>
-<td>👥 {{ event.booking_count }}</td>
+<td>{{ event.booking_count }}</td>
+
 <td>
 <a href="/participants/{{ event.id }}" class="btn btn-primary btn-sm">
 View
 </a>
 </td>
+
 </tr>
+
 {% endfor %}
 
 </table>
 
-<br>
+</div>
 
-<a href="/logout" class="btn btn-danger">Logout</a>
+</div>
 
 </div>
 
