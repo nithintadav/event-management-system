@@ -32,9 +32,9 @@
 <a class="nav-link text-white" href="/create_event">Create Event</a>
 </li>
 
-<li class="nav-item mb-2">
+<!-- <li class="nav-item mb-2">
 <a class="nav-link text-white" href="/events">Events</a>
-</li>
+</li> -->
 
 <li class="nav-item mb-2">
 <a class="nav-link text-white" href="/logout">Logout</a>
@@ -152,6 +152,10 @@
 <td>
 <a href="/participants/{{ event.id }}" class="btn btn-primary btn-sm">
 View
+</a>
+
+<a href="/delete_event/{{ event.id }}" class="btn btn-danger btn-sm">
+Delete
 </a>
 </td>
 

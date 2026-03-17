@@ -333,6 +333,24 @@ def view_participants(event_id):
         )
 
     return redirect('/login')
+# ---------------- DELETE EVENT ----------------
+@app.route('/delete_event/<int:event_id>')
+def delete_event(event_id):
+
+    if 'user_id' in session and session.get('role') == 'admin':
+
+        db = get_db()
+        cursor = db.cursor()
+
+        cursor.execute("DELETE FROM events WHERE id=%s", (event_id,))
+        db.commit()
+
+        cursor.close()
+        db.close()
+
+        return redirect('/admin')
+
+    return redirect('/login')
 
 # ---------------- LOGOUT ----------------
 @app.route('/logout')
