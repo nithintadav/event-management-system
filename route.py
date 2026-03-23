@@ -123,8 +123,14 @@ def admin():
         cursor.execute("SELECT COUNT(*) AS total FROM users WHERE role='user'")
         total_normal_users = cursor.fetchone()['total']
 
-        # ---------------- EVENTS ----------------
-        cursor.execute("SELECT * FROM events ORDER BY event_date ASC")
+        # ---------------- EVENTS (UPDATED) ----------------
+        cursor.execute("""
+            SELECT events.*, COUNT(bookings.id) AS booking_count
+            FROM events
+            LEFT JOIN bookings ON events.id = bookings.event_id
+            GROUP BY events.id
+            ORDER BY events.event_date ASC
+        """)
         events = cursor.fetchall()
 
         cursor.execute("SELECT COUNT(*) AS total FROM events")
@@ -145,7 +151,6 @@ def admin():
         )
 
     return redirect('/login')
-
 # ---------------- DELETE USER ----------------
 @app.route('/delete_user/<int:user_id>')
 def delete_user(user_id):
@@ -177,10 +182,31 @@ def delete_user(user_id):
 def view_events():
     if 'user_id' in session:
 
+        search = request.args.get('search', '')
+        location = request.args.get('location', '')
+        date = request.args.get('date', '')
+
         db = get_db()
         cursor = db.cursor(dictionary=True)
 
-        cursor.execute("SELECT * FROM events ORDER BY event_date ASC")
+        query = "SELECT * FROM events WHERE 1=1"
+        params = []
+
+        if search:
+            query += " AND title LIKE %s"
+            params.append(f"%{search}%")
+
+        if location:
+            query += " AND location LIKE %s"
+            params.append(f"%{location}%")
+
+        if date:
+            query += " AND event_date = %s"
+            params.append(date)
+
+        query += " ORDER BY event_date ASC"
+
+        cursor.execute(query, tuple(params))
         events = cursor.fetchall()
 
         cursor.close()
@@ -334,6 +360,40 @@ def view_participants(event_id):
 
     return redirect('/login')
 # ---------------- DELETE EVENT ----------------
+@app.route('/edit_event/<int:event_id>', methods=['GET', 'POST'])
+def edit_event(event_id):
+    if 'user_id' in session and session.get('role') == 'admin':
+
+        db = get_db()
+        cursor = db.cursor(dictionary=True)
+
+        if request.method == 'POST':
+            title = request.form['title']
+            description = request.form['description']
+            event_date = request.form['event_date']
+            location = request.form['location']
+
+            cursor.execute("""
+                UPDATE events 
+                SET title=%s, description=%s, event_date=%s, location=%s
+                WHERE id=%s
+            """, (title, description, event_date, location, event_id))
+
+            db.commit()
+            cursor.close()
+            db.close()
+
+            return redirect('/admin')
+
+        cursor.execute("SELECT * FROM events WHERE id=%s", (event_id,))
+        event = cursor.fetchone()
+
+        cursor.close()
+        db.close()
+
+        return render_template("edit_event.html", event=event)
+
+    return redirect('/login')
 @app.route('/delete_event/<int:event_id>')
 def delete_event(event_id):
 
