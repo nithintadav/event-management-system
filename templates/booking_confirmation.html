@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Booking Confirmed{% endblock %}
+
+{% block extra_head %}
+<style>
+  @media print {
+    nav, footer, .no-print { display: none !important; }
+    body { background: #fff !important; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 60px 0;">
+
+  <div class="text-center mb-4 reveal is-visible">
+    <div style="font-size: 3rem;">✅</div>
+    <h2 class="font-display mt-2">Booking Confirmed!</h2>
+    <p class="text-muted-custom">Your registration slip is below — save it or print it for entry.</p>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="ticket-card reveal is-visible" id="slip">
+        <div class="ticket-body" style="background: var(--ink); color: var(--paper);">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="mono small mb-1" style="opacity:0.7;">REGISTRATION SLIP</p>
+              <h4 class="mb-0">{{ booking.title }}</h4>
+            </div>
+            <span class="badge bg-success">CONFIRMED</span>
+          </div>
+        </div>
+
+        <div class="ticket-body">
+          <div class="row">
+            <div class="col-7">
+              <p class="small text-muted-custom mb-1">Attendee</p>
+              <p class="mb-3"><strong>{{ booking.attendee_name }}</strong><br>{{ booking.attendee_email }}</p>
+
+              <p class="small text-muted-custom mb-1">Event Details</p>
+              <p class="mono small mb-1">📅 {{ booking.event_date }} &nbsp; ⏰ {{ booking.event_time }}</p>
+              <p class="mono small mb-1">📍 {{ booking.venue }}</p>
+              <p class="mono small mb-0">🎤 Organized by {{ booking.organizer }}</p>
+            </div>
+            <div class="col-5 text-center">
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data={{ ticket_ref|urlencode }}"
+                   alt="Ticket QR code" width="140" height="140">
+              <p class="mono small mt-2 mb-0">{{ ticket_ref }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="ticket-stub">
+          <div class="ticket-stub-line"></div>
+          <div class="d-flex justify-content-between small text-muted-custom">
+            <span>Fee Paid</span>
+            <strong class="mono">{{ 'FREE' if booking.fee == 0 else '₹%.2f'|format(booking.fee) }}</strong>
+          </div>
+          <div class="d-flex justify-content-between small text-muted-custom mt-1">
+            <span>Booked At</span>
+            <span class="mono">{{ booking.booked_at }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2 mt-4 no-print">
+        <button class="btn btn-outline-secondary w-50" onclick="window.print()">🖨 Print Slip</button>
+        <a href="{{ url_for('my_bookings') }}" class="btn btn-signal w-50">Go to My Bookings</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

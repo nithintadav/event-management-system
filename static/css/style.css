@@ -1,0 +1,431 @@
+/* =========================================================
+   Design tokens
+   ========================================================= */
+:root {
+    --ink: #14213D;
+    --paper: #FBF9F6;
+    --signal: #F2A541;
+    --signal-dark: #D98C1F;
+    --teal: #0E6E63;
+    --coral: #E4572E;
+    --mist: #E8E6E1;
+    --text-muted: #5B6472;
+
+    --font-display: "Fraunces", "Georgia", serif;
+    --font-body: "Inter", system-ui, -apple-system, sans-serif;
+    --font-mono: "IBM Plex Mono", monospace;
+
+    --radius: 14px;
+    --shadow-soft: 0 10px 30px rgba(20, 33, 61, 0.08);
+    --shadow-hover: 0 16px 40px rgba(20, 33, 61, 0.14);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--font-body);
+    background: var(--paper);
+    color: var(--ink);
+}
+
+h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.text-muted-custom { color: var(--text-muted); }
+.mono { font-family: var(--font-mono); letter-spacing: 0.02em; }
+
+a { color: var(--teal); }
+a:hover { color: var(--ink); }
+
+/* =========================================================
+   Navbar
+   ========================================================= */
+.navbar-brand-custom {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--paper) !important;
+}
+
+.navbar-custom {
+    background: var(--ink);
+}
+
+.navbar-custom .nav-link {
+    color: rgba(251, 249, 246, 0.85) !important;
+    font-weight: 500;
+    margin: 0 4px;
+}
+
+.navbar-custom .nav-link:hover {
+    color: var(--signal) !important;
+}
+
+.btn-signal {
+    background: var(--signal);
+    border: none;
+    color: var(--ink);
+    font-weight: 600;
+}
+
+.btn-signal:hover {
+    background: var(--signal-dark);
+    color: var(--ink);
+}
+
+.btn-outline-paper {
+    border: 1.5px solid rgba(251, 249, 246, 0.5);
+    color: var(--paper);
+    font-weight: 500;
+}
+
+.btn-outline-paper:hover {
+    border-color: var(--paper);
+    background: rgba(251, 249, 246, 0.08);
+    color: var(--paper);
+}
+
+.btn-teal {
+    background: var(--teal);
+    border: none;
+    color: var(--paper);
+    font-weight: 600;
+}
+.btn-teal:hover { background: #0a5a51; color: var(--paper); }
+
+.btn-coral {
+    background: var(--coral);
+    border: none;
+    color: var(--paper);
+    font-weight: 600;
+}
+.btn-coral:hover { background: #c9481f; color: var(--paper); }
+
+/* =========================================================
+   Perforation divider — the signature motif
+   ========================================================= */
+.perforation {
+    position: relative;
+    height: 1px;
+    background: repeating-linear-gradient(
+        to right,
+        var(--mist) 0, var(--mist) 8px,
+        transparent 8px, transparent 16px
+    );
+    margin: 0;
+}
+
+.perforation::before,
+.perforation::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 24px;
+    background: var(--paper);
+    border-radius: 50%;
+}
+.perforation::before { left: -12px; }
+.perforation::after { right: -12px; }
+
+/* =========================================================
+   Ticket-stub event card
+   ========================================================= */
+.ticket-card {
+    position: relative;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+    overflow: hidden;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.ticket-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-hover);
+}
+
+.ticket-card .ticket-banner {
+    height: 170px;
+    background-size: cover;
+    background-position: center;
+    background-color: var(--mist);
+    position: relative;
+}
+
+.ticket-card .ticket-category {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(20, 33, 61, 0.85);
+    color: var(--paper);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.ticket-card .ticket-body {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.ticket-card .ticket-stub {
+    position: relative;
+    border-top: none;
+    padding: 14px 20px 18px;
+}
+
+/* notch cutouts creating the "tear here" effect */
+.ticket-card .ticket-stub::before {
+    content: "";
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    width: 24px;
+    height: 24px;
+    background: var(--paper);
+    border-radius: 50%;
+}
+.ticket-card .ticket-stub::after {
+    content: "";
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    width: 24px;
+    height: 24px;
+    background: var(--paper);
+    border-radius: 50%;
+}
+.ticket-card .ticket-stub-line {
+    border-top: 2px dashed var(--mist);
+    margin: 0 4px 14px;
+}
+
+.seats-left {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+}
+.seats-left.low { color: var(--coral); font-weight: 600; }
+.seats-left.ok { color: var(--teal); }
+
+/* =========================================================
+   Hero
+   ========================================================= */
+.hero {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 90px 0 70px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    right: -80px;
+    top: -80px;
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(242,165,65,0.18), transparent 70%);
+}
+
+.hero h1 {
+    font-size: clamp(2.2rem, 4vw, 3.4rem);
+    line-height: 1.1;
+}
+
+.hero .lead {
+    color: rgba(251, 249, 246, 0.8);
+    font-size: 1.15rem;
+    max-width: 520px;
+}
+
+.hero-badge {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--signal);
+    border: 1px solid rgba(242,165,65,0.4);
+    padding: 5px 12px;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* Sample ticket stub graphic in hero */
+.hero-ticket {
+    background: #fff;
+    color: var(--ink);
+    border-radius: var(--radius);
+    box-shadow: 0 30px 60px rgba(0,0,0,0.35);
+    padding: 22px;
+    transform: rotate(3deg);
+    transition: transform 0.4s ease;
+}
+.hero-ticket:hover { transform: rotate(0deg); }
+
+/* =========================================================
+   Feature / why-choose-us boxes
+   ========================================================= */
+.feature-box {
+    padding: 28px 22px;
+    border-radius: var(--radius);
+    background: #fff;
+    box-shadow: var(--shadow-soft);
+    transition: transform 0.25s ease;
+    height: 100%;
+}
+.feature-box:hover { transform: translateY(-4px); }
+
+.feature-icon {
+    font-size: 1.8rem;
+    display: inline-flex;
+    width: 52px;
+    height: 52px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(14,110,99,0.1);
+    margin-bottom: 14px;
+}
+
+/* =========================================================
+   Testimonials
+   ========================================================= */
+.testimonial-card {
+    background: #fff;
+    border-left: 3px solid var(--signal);
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: var(--shadow-soft);
+    height: 100%;
+}
+
+/* =========================================================
+   Footer
+   ========================================================= */
+.footer-custom {
+    background: var(--ink);
+    color: rgba(251,249,246,0.7);
+    padding: 50px 0 20px;
+}
+.footer-custom h6 {
+    color: var(--paper);
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+}
+.footer-custom a {
+    color: rgba(251,249,246,0.7);
+    text-decoration: none;
+}
+.footer-custom a:hover { color: var(--signal); }
+
+.social-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(251,249,246,0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    color: var(--paper);
+    transition: background 0.2s ease;
+}
+.social-icon:hover { background: var(--signal); color: var(--ink); }
+
+/* =========================================================
+   Dashboard cards (shared by admin + user dashboards)
+   ========================================================= */
+.stat-card {
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    color: var(--paper);
+    box-shadow: var(--shadow-soft);
+}
+.stat-card h6 { opacity: 0.85; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.stat-card h3 { font-family: var(--font-mono); margin: 0; }
+
+.bg-ink { background: var(--ink); }
+.bg-teal-solid { background: var(--teal); }
+.bg-signal-solid { background: var(--signal); color: var(--ink) !important; }
+.bg-coral-solid { background: var(--coral); }
+
+.sidebar-custom {
+    background: var(--ink);
+    min-height: 100vh;
+}
+.sidebar-custom .nav-link {
+    color: rgba(251,249,246,0.75);
+    border-radius: 8px;
+    margin-bottom: 4px;
+}
+.sidebar-custom .nav-link:hover,
+.sidebar-custom .nav-link.active {
+    background: rgba(242,165,65,0.14);
+    color: var(--signal);
+}
+
+/* =========================================================
+   Scroll reveal animation
+   ========================================================= */
+.reveal {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* =========================================================
+   Toasts / dark mode toggle
+   ========================================================= */
+.dark-toggle {
+    cursor: pointer;
+    background: none;
+    border: 1px solid rgba(251,249,246,0.3);
+    color: var(--paper);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+}
+
+body.dark-mode {
+    --paper: #14213D;
+    --ink: #FBF9F6;
+    background: #0F1A30;
+    color: #E8E6E1;
+}
+body.dark-mode .ticket-card,
+body.dark-mode .feature-box,
+body.dark-mode .testimonial-card,
+body.dark-mode .form-card {
+    background: #1B2A4A;
+    color: #E8E6E1;
+}
+
+@media (max-width: 768px) {
+    .hero { padding: 60px 0 50px; text-align: center; }
+    .hero .lead { margin-left: auto; margin-right: auto; }
+}

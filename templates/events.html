@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Browse Events{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 50px 0;">
+
+  <div class="mb-4 reveal is-visible">
+    <span class="hero-badge" style="color: var(--teal); border-color: rgba(14,110,99,0.3);">Discover</span>
+    <h2 class="font-display mt-2">Browse Events</h2>
+  </div>
+
+  <!-- FILTER BAR -->
+  <form method="GET" class="feature-box mb-4 reveal is-visible">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small text-muted-custom">Search</label>
+        <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Event title" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small text-muted-custom">Location</label>
+        <input type="text" name="location" value="{{ request.args.get('location', '') }}" placeholder="Venue" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small text-muted-custom">Date</label>
+        <input type="date" name="date" value="{{ request.args.get('date', '') }}" class="form-control">
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small text-muted-custom">Category</label>
+        <select name="category" class="form-select">
+          <option value="">All</option>
+          {% for cat in categories %}
+          <option value="{{ cat.name }}" {% if request.args.get('category') == cat.name %}selected{% endif %}>{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small text-muted-custom">Sort by</label>
+        <select name="sort" class="form-select">
+          <option value="date_asc" {% if sort == 'date_asc' %}selected{% endif %}>Date ↑</option>
+          <option value="date_desc" {% if sort == 'date_desc' %}selected{% endif %}>Date ↓</option>
+          <option value="fee_asc" {% if sort == 'fee_asc' %}selected{% endif %}>Fee: Low to High</option>
+          <option value="fee_desc" {% if sort == 'fee_desc' %}selected{% endif %}>Fee: High to Low</option>
+        </select>
+      </div>
+      <div class="col-md-1">
+        <button type="submit" class="btn btn-signal w-100">Go</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- EVENTS GRID -->
+  <div class="row g-4">
+    {% for event in events %}
+    <div class="col-md-4 reveal is-visible">
+      <div class="ticket-card">
+        <div class="ticket-banner" style="{% if event.banner_image %}background-image: url('{{ url_for('static', filename='uploads/' ~ event.banner_image) }}');{% else %}background: linear-gradient(135deg, var(--ink), var(--teal));{% endif %}">
+          {% if event.category_name %}<span class="ticket-category">{{ event.category_name }}</span>{% endif %}
+          {% if session.get('role') == 'user' %}
+          <form method="POST" action="{{ url_for('toggle_wishlist', event_id=event.id) }}" style="position:absolute; top:10px; right:10px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-sm" style="background:#fff; border-radius:50%; width:34px; height:34px; padding:0;">
+              {{ '❤️' if event.id in wishlist_ids else '🤍' }}
+            </button>
+          </form>
+          {% endif %}
+        </div>
+        <div class="ticket-body">
+          <h5 class="mb-1">{{ event.title }}</h5>
+          <p class="text-muted-custom small mb-2">by {{ event.organizer }}</p>
+          <p class="small mb-1">{{ event.description[:70] }}{% if event.description|length > 70 %}…{% endif %}</p>
+          <p class="mono small mb-0">📅 {{ event.event_date }} &nbsp; ⏰ {{ event.event_time }}</p>
+          <p class="mono small mb-0">📍 {{ event.venue }}</p>
+          <p class="mono small mb-0">💳 {{ 'Free' if event.fee == 0 else '₹%.2f'|format(event.fee) }}</p>
+        </div>
+        <div class="ticket-stub">
+          <div class="ticket-stub-line"></div>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <span class="seats-left {{ 'low' if event.seats_left <= 5 else 'ok' }}">
+              {{ event.seats_left }} seats left
+            </span>
+            <span class="badge {{ 'bg-secondary' if event.status != 'upcoming' else 'bg-success' }}">{{ event.status }}</span>
+          </div>
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('event_details', event_id=event.id) }}" class="btn btn-outline-secondary btn-sm w-50">View Details</a>
+            {% if event.seats_left <= 0 %}
+            <button class="btn btn-signal btn-sm w-50" disabled>Sold Out</button>
+            {% else %}
+            <a href="{{ url_for('checkout', event_id=event.id) }}" class="btn btn-signal btn-sm w-50">Book Now</a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-muted-custom py-5">
+      <p>No events match your search. Try clearing a filter.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

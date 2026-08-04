@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Participants{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 50px 0;">
+
+  <a href="{{ url_for('admin') }}" class="text-decoration-none small">⬅ Back to Admin</a>
+
+  <h2 class="font-display mt-3 mb-4">Participants for "{{ event_title }}" 🎟</h2>
+
+  {% if participants %}
+  <table class="table table-bordered table-striped">
+    <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Booked At</th></tr></thead>
+    <tbody>
+      {% for user in participants %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ user.name }}</td>
+        <td>{{ user.email }}</td>
+        <td class="mono">{{ user.booked_at }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="feature-box text-center text-muted-custom">
+    <p class="mb-0">No participants yet for this event.</p>
+  </div>
+  {% endif %}
+
+</section>
+{% endblock %}

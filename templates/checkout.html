@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block title %}Checkout{% endblock %}
+
+{% block extra_head %}
+<style>
+  .pay-tile {
+    border: 1.5px solid var(--mist);
+    border-radius: 12px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+  .pay-tile:hover { border-color: var(--signal); transform: translateY(-2px); }
+  .pay-tile.selected { border-color: var(--teal); background: rgba(14,110,99,0.06); box-shadow: 0 0 0 2px var(--teal); }
+  .pay-tile .pay-icon { font-size: 1.8rem; display: block; margin-bottom: 6px; }
+  .pay-detail-panel { display: none; }
+  .pay-detail-panel.active { display: block; }
+  .qr-box { background: #fff; border: 1px solid var(--mist); border-radius: 12px; padding: 16px; text-align: center; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 50px 0;">
+
+  <a href="{{ url_for('event_details', event_id=event.id) }}" class="text-decoration-none small">⬅ Back to Event</a>
+
+  <div class="row g-5 mt-2">
+
+    <!-- ORDER SUMMARY -->
+    <div class="col-lg-5 reveal is-visible">
+      <div class="ticket-card">
+        <div class="ticket-banner" style="{% if event.banner_image %}background-image: url('{{ url_for('static', filename='uploads/' ~ event.banner_image) }}');{% else %}background: linear-gradient(135deg, var(--ink), var(--teal));{% endif %}">
+          {% if event.category_name %}<span class="ticket-category">{{ event.category_name }}</span>{% endif %}
+        </div>
+        <div class="ticket-body">
+          <h5 class="mb-1">{{ event.title }}</h5>
+          <p class="text-muted-custom small mb-2">by {{ event.organizer }}</p>
+          <p class="mono small mb-0">📅 {{ event.event_date }} &nbsp; ⏰ {{ event.event_time }}</p>
+          <p class="mono small mb-0">📍 {{ event.venue }}</p>
+        </div>
+        <div class="ticket-stub">
+          <div class="ticket-stub-line"></div>
+          <div class="d-flex justify-content-between">
+            <span>Registration Fee</span>
+            <strong class="mono">{{ 'FREE' if event.fee == 0 else '₹%.2f'|format(event.fee) }}</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAYMENT -->
+    <div class="col-lg-7 reveal is-visible">
+      <div class="feature-box">
+        <h4 class="font-display mb-1">{{ 'Confirm Registration' if event.fee == 0 else 'Make Payment' }}</h4>
+        <p class="text-muted-custom small mb-4">
+          {% if event.fee == 0 %}
+            This event is free — just confirm your seat.
+          {% else %}
+            This is a demo checkout for a college project — no real transaction takes place.
+          {% endif %}
+        </p>
+
+        <form method="POST" action="{{ url_for('confirm_payment', event_id=event.id) }}" id="paymentForm">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="payment_method" id="selectedMethod" value="{{ 'Free Registration' if event.fee == 0 else '' }}">
+
+          {% if event.fee == 0 %}
+          <button type="submit" class="btn btn-teal w-100 btn-lg">Confirm My Seat</button>
+
+          {% else %}
+
+          <!-- QR CODE -->
+          <div class="qr-box mb-4">
+            <p class="small text-muted-custom mb-2">Scan to pay via any UPI app</p>
+            <img src="{{ url_for('static', filename='images/sample_qr.png') }}"
+                 alt="Scan to pay QR code" width="180" height="180">
+            <p class="mono small mt-2 mb-1">₹{{ '%.2f'|format(event.fee) }}</p>
+            <p class="text-muted-custom" style="font-size: 0.72rem;">Sample QR for demo purposes — swap <code>static/images/sample_qr.png</code> for your real UPI QR before submission.</p>
+          </div>
+
+          <p class="small text-muted-custom mb-2">Or choose a payment method</p>
+
+          <div class="row g-3 mb-4">
+            <div class="col-4">
+              <div class="pay-tile" data-method="UPI" data-target="panel-upi">
+                <span class="pay-icon">📱</span>
+                <span class="small">UPI</span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="pay-tile" data-method="Debit Card" data-target="panel-card">
+                <span class="pay-icon">💳</span>
+                <span class="small">Debit Card</span>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="pay-tile" data-method="Net Banking" data-target="panel-netbanking">
+                <span class="pay-icon">🏦</span>
+                <span class="small">Net Banking</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- UPI PANEL -->
+          <div class="pay-detail-panel mb-3" id="panel-upi">
+            <label class="form-label small">UPI ID</label>
+            <input type="text" class="form-control" placeholder="yourname@upi">
+          </div>
+
+          <!-- CARD PANEL -->
+          <div class="pay-detail-panel mb-3" id="panel-card">
+            <div class="row g-2">
+              <div class="col-12">
+                <label class="form-label small">Card Number</label>
+                <input type="text" class="form-control" placeholder="•••• •••• •••• ••••" maxlength="19">
+              </div>
+              <div class="col-6">
+                <label class="form-label small">Expiry</label>
+                <input type="text" class="form-control" placeholder="MM/YY">
+              </div>
+              <div class="col-6">
+                <label class="form-label small">CVV</label>
+                <input type="password" class="form-control" placeholder="•••" maxlength="3">
+              </div>
+            </div>
+          </div>
+
+          <!-- NETBANKING PANEL -->
+          <div class="pay-detail-panel mb-3" id="panel-netbanking">
+            <label class="form-label small">Select Bank</label>
+            <select class="form-select">
+              <option>State Bank of India</option>
+              <option>HDFC Bank</option>
+              <option>ICICI Bank</option>
+              <option>Axis Bank</option>
+              <option>Punjab National Bank</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-signal w-100 btn-lg" id="payButton" disabled>
+            Select a payment method
+          </button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const tiles = document.querySelectorAll(".pay-tile");
+  const panels = document.querySelectorAll(".pay-detail-panel");
+  const payButton = document.getElementById("payButton");
+  const selectedMethod = document.getElementById("selectedMethod");
+
+  tiles.forEach((tile) => {
+    tile.addEventListener("click", () => {
+      tiles.forEach((t) => t.classList.remove("selected"));
+      panels.forEach((p) => p.classList.remove("active"));
+
+      tile.classList.add("selected");
+      const target = document.getElementById(tile.dataset.target);
+      if (target) target.classList.add("active");
+
+      selectedMethod.value = tile.dataset.method;
+      if (payButton) {
+        payButton.disabled = false;
+        payButton.textContent = `Pay via ${tile.dataset.method}`;
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }}{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 50px 0;">
+
+  <a href="{{ url_for('view_events') }}" class="text-decoration-none small">⬅ Back to Events</a>
+
+  <div class="row g-5 mt-2">
+    <!-- LEFT: banner + description -->
+    <div class="col-lg-7 reveal is-visible">
+      <div class="ticket-banner mb-4" style="height: 320px; border-radius: var(--radius); {% if event.banner_image %}background-image: url('{{ url_for('static', filename='uploads/' ~ event.banner_image) }}');{% else %}background: linear-gradient(135deg, var(--ink), var(--teal));{% endif %}">
+        {% if event.category_name %}<span class="ticket-category">{{ event.category_name }}</span>{% endif %}
+      </div>
+
+      <h2 class="font-display">{{ event.title }}</h2>
+      <p class="text-muted-custom mb-4">Organized by <strong>{{ event.organizer }}</strong></p>
+
+      <h5>About this event</h5>
+      <p>{{ event.description }}</p>
+
+      {% if event.guidelines %}
+      <h5 class="mt-4">Guidelines</h5>
+      <p>{{ event.guidelines }}</p>
+      {% endif %}
+
+      <h5 class="mt-4">FAQs</h5>
+      <div class="accordion" id="faqAccordion">
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+              Can I cancel my booking?
+            </button>
+          </h2>
+          <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">Yes — head to "My Bookings" any time before the event date and cancel with one click.</div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+              Is there a registration fee?
+            </button>
+          </h2>
+          <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">
+              {{ 'This event is free to attend.' if event.fee == 0 else '₹%.2f'|format(event.fee) ~ ' per seat, shown at booking.' }}
+            </div>
+          </div>
+        </div>
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+              Who do I contact with questions?
+            </button>
+          </h2>
+          <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+            <div class="accordion-body">See the contact details in the sidebar — the organizer typically replies within a day.</div>
+          </div>
+        </div>
+      </div>
+
+      {% if gallery %}
+      <h5 class="mt-4">Gallery</h5>
+      <div class="row g-2">
+        {% for img in gallery %}
+        <div class="col-4">
+          <img src="{{ url_for('static', filename='uploads/' ~ img.image_path) }}" class="img-fluid rounded" alt="Event photo">
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT: sticky booking card -->
+    <div class="col-lg-5 reveal is-visible">
+      <div class="ticket-card" style="position: sticky; top: 90px;">
+        <div class="ticket-body">
+          <p class="mono small mb-1">📅 {{ event.event_date }} &nbsp; ⏰ {{ event.event_time }}</p>
+          <p class="mono small mb-1">📍 {{ event.venue }}</p>
+          <p class="mono small mb-3">💳 {{ 'Free' if event.fee == 0 else '₹%.2f'|format(event.fee) }}</p>
+
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="seats-left {{ 'low' if event.seats_left <= 5 else 'ok' }}">{{ event.seats_left }} / {{ event.max_seats }} seats left</span>
+            <span class="badge {{ 'bg-secondary' if event.status != 'upcoming' else 'bg-success' }}">{{ event.status }}</span>
+          </div>
+        </div>
+        <div class="ticket-stub">
+          <div class="ticket-stub-line"></div>
+          {% if event.seats_left <= 0 %}
+          <button class="btn btn-signal w-100 mb-2" disabled>Sold Out</button>
+          {% else %}
+          <a href="{{ url_for('checkout', event_id=event.id) }}" class="btn btn-signal w-100 mb-2 d-block text-center">Book Now</a>
+          {% endif %}
+          <button type="button" class="btn btn-outline-secondary w-100" onclick="navigator.share ? navigator.share({title: '{{ event.title }}', url: window.location.href}) : alert('Copy this link: ' + window.location.href)">
+            Share Event
+          </button>
+
+          <div class="perforation my-3"></div>
+          <p class="small text-muted-custom mb-1"><strong>Contact</strong></p>
+          {% if event.contact_email %}<p class="small mb-1">📧 {{ event.contact_email }}</p>{% endif %}
+          {% if event.contact_phone %}<p class="small mb-0">📞 {{ event.contact_phone }}</p>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Create Event{% endblock %}
+
+{% block content %}
+<section class="container" style="padding: 50px 0;">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="feature-box reveal is-visible">
+        <h3 class="font-display mb-4">Create New Event 🎟</h3>
+
+        <form method="POST" enctype="multipart/form-data">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="row g-3">
+            <div class="col-md-8">
+              <label class="form-label">Title</label>
+              <input type="text" name="title" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Category</label>
+              <select name="category_id" class="form-select">
+                <option value="">Uncategorized</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Description</label>
+              <textarea name="description" class="form-control" rows="3" required></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Organizer</label>
+              <input type="text" name="organizer" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Venue</label>
+              <input type="text" name="venue" class="form-control" required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Date</label>
+              <input type="date" name="event_date" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Time</label>
+              <input type="time" name="event_time" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Registration Fee (₹)</label>
+              <input type="number" step="0.01" min="0" name="fee" class="form-control" value="0">
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Maximum Seats</label>
+              <input type="number" min="1" name="max_seats" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Event Banner</label>
+              <input type="file" name="banner_image" accept="image/*" class="form-control">
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Guidelines</label>
+              <textarea name="guidelines" class="form-control" rows="2" placeholder="Dress code, ID requirements, etc."></textarea>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Contact Email</label>
+              <input type="email" name="contact_email" class="form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Contact Phone</label>
+              <input type="text" name="contact_phone" class="form-control">
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-signal w-100 mt-4">Create Event</button>
+        </form>
+
+        <div class="text-center mt-3">
+          <a href="{{ url_for('admin') }}" class="text-decoration-none">⬅ Back to Admin</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

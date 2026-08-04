@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="home">
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-6 reveal">
+        <span class="hero-badge">Campus &amp; Corporate Events</span>
+        <h1 class="font-display text-white mt-3 mb-3">Every great event<br>starts with one click.</h1>
+        <p class="lead">Discover events worth showing up for, book your seat in seconds, and manage every registration from one clean dashboard.</p>
+        <div class="d-flex gap-3 mt-4">
+          <a href="{{ url_for('register') }}" class="btn btn-signal btn-lg px-4">Get Started</a>
+          <a href="{{ url_for('login') if session.get('user_id') else url_for('login') }}" class="btn btn-outline-paper btn-lg px-4">Browse Events</a>
+        </div>
+      </div>
+      <div class="col-lg-6 reveal">
+        <div class="hero-ticket mx-auto" style="max-width: 380px;">
+          <span class="badge bg-dark mb-2">FEATURED</span>
+          <h4 class="font-display mb-1">Annual Tech Summit</h4>
+          <p class="text-muted-custom small mb-3">Where builders meet the future.</p>
+          <div class="perforation my-3"></div>
+          <div class="d-flex justify-content-between mono small">
+            <span>📅 Aug 20, 2026</span>
+            <span>📍 Main Auditorium</span>
+          </div>
+          <div class="d-flex justify-content-between mono small mt-2">
+            <span>⏰ 10:00 AM</span>
+            <span class="seats-left ok">42 seats left</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHY CHOOSE US ============ -->
+<section class="container py-5" id="about">
+  <div class="text-center mb-5 reveal">
+    <span class="hero-badge" style="color: var(--teal); border-color: rgba(14,110,99,0.3);">Why Eventra</span>
+    <h2 class="font-display mt-3">Built for people who hate friction</h2>
+    <p class="text-muted-custom">No spreadsheets, no confusion — just events, booked properly.</p>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-md-4 reveal">
+      <div class="feature-box">
+        <div class="feature-icon">🎯</div>
+        <h5>One-Click Booking</h5>
+        <p class="text-muted-custom mb-0">Reserve your seat the moment you find an event you like — no forms to re-fill.</p>
+      </div>
+    </div>
+    <div class="col-md-4 reveal">
+      <div class="feature-box">
+        <div class="feature-icon">⚙️</div>
+        <h5>Real Admin Control</h5>
+        <p class="text-muted-custom mb-0">Organizers manage capacity, participants, and event details from a single dashboard.</p>
+      </div>
+    </div>
+    <div class="col-md-4 reveal">
+      <div class="feature-box">
+        <div class="feature-icon">📊</div>
+        <h5>Live Insights</h5>
+        <p class="text-muted-custom mb-0">Track bookings, popularity, and seat availability as they happen.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container"><div class="perforation"></div></div>
+
+<!-- ============ FEATURED / UPCOMING EVENTS ============ -->
+<section class="container py-5">
+  <div class="d-flex justify-content-between align-items-end mb-4 reveal">
+    <div>
+      <span class="hero-badge" style="color: var(--coral); border-color: rgba(228,87,46,0.3);">Happening Soon</span>
+      <h2 class="font-display mt-2 mb-0">Upcoming Events</h2>
+    </div>
+    <a href="{{ url_for('login') }}" class="btn btn-teal">View All</a>
+  </div>
+
+  <div class="row g-4">
+    {% for event in events %}
+    <div class="col-md-4 reveal">
+      <div class="ticket-card">
+        <div class="ticket-banner" style="{% if event.banner_image %}background-image: url('{{ url_for('static', filename='uploads/' ~ event.banner_image) }}');{% else %}background: linear-gradient(135deg, var(--ink), var(--teal));{% endif %}">
+          {% if event.category_name %}<span class="ticket-category">{{ event.category_name }}</span>{% endif %}
+        </div>
+        <div class="ticket-body">
+          <h5 class="mb-1">{{ event.title }}</h5>
+          <p class="text-muted-custom small mb-2">{{ event.description[:80] }}{% if event.description|length > 80 %}…{% endif %}</p>
+          <p class="mono small mb-0">📅 {{ event.event_date }} &nbsp; ⏰ {{ event.event_time }}</p>
+        </div>
+        <div class="ticket-stub">
+          <div class="ticket-stub-line"></div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="seats-left {{ 'low' if event.seats_left is defined and event.seats_left <= 5 else 'ok' }}">
+              {% if event.seats_left is defined %}{{ event.seats_left }} seats left{% endif %}
+            </span>
+            <a href="{{ url_for('login') }}" class="btn btn-signal btn-sm">View More</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center text-muted-custom reveal">
+      <p>No upcoming events yet — check back soon, or log in as admin to create the first one.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<div class="container"><div class="perforation"></div></div>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="container py-5">
+  <div class="text-center mb-5 reveal">
+    <h2 class="font-display">What attendees say</h2>
+  </div>
+  <div class="row g-4">
+    <div class="col-md-4 reveal">
+      <div class="testimonial-card">
+        <p class="mb-3">"Booked my seat for the tech summit in under a minute. No account confusion, no chasing confirmation emails."</p>
+        <strong>— Ananya R., Student</strong>
+      </div>
+    </div>
+    <div class="col-md-4 reveal">
+      <div class="testimonial-card">
+        <p class="mb-3">"As an organizer, seeing live booking counts instead of a shared spreadsheet has been a genuine relief."</p>
+        <strong>— Karthik M., Event Coordinator</strong>
+      </div>
+    </div>
+    <div class="col-md-4 reveal">
+      <div class="testimonial-card">
+        <p class="mb-3">"Clean, fast, and it actually tells you how many seats are left before you commit."</p>
+        <strong>— Priya S., Attendee</strong>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONTACT ============ -->
+<section class="container py-5" id="contact">
+  <div class="row g-4 align-items-center">
+    <div class="col-lg-6 reveal">
+      <h2 class="font-display">Questions before you book?</h2>
+      <p class="text-muted-custom">Reach out and our team will get back within one business day.</p>
+      <p class="mono">📧 support@eventra.example</p>
+      <p class="mono">📞 +91 98765 43210</p>
+    </div>
+    <div class="col-lg-6 reveal">
+      <form class="feature-box">
+        <div class="mb-3">
+          <input type="text" class="form-control" placeholder="Your name" required>
+        </div>
+        <div class="mb-3">
+          <input type="email" class="form-control" placeholder="Your email" required>
+        </div>
+        <div class="mb-3">
+          <textarea class="form-control" rows="3" placeholder="Your message" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-signal w-100">Send Message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section style="background: var(--teal);" class="text-center py-5">
+  <h3 class="font-display text-white mb-3">Ready to explore events?</h3>
+  <a href="{{ url_for('register') }}" class="btn btn-signal btn-lg">Get Started Free</a>
+</section>
+
+{% endblock %}

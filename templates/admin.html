@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_head %}
+<style>
+  .admin-shell { display: flex; min-height: calc(100vh - 76px); }
+  .admin-main { flex: 1; padding: 30px; background: var(--paper); }
+  .table-search { max-width: 280px; }
+  .page-btn.active { background: var(--signal); color: var(--ink); border-color: var(--signal); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-shell">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar-custom p-3" style="width: 230px;">
+    <h5 class="font-display text-white mb-4">🎟 Admin Panel</h5>
+    <ul class="nav flex-column">
+      <li class="nav-item"><a class="nav-link active" href="{{ url_for('admin') }}">📊 Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('create_event') }}">➕ Create Event</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('view_events') }}">🔍 Browse Events</a></li>
+      <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">🚪 Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- MAIN -->
+  <div class="admin-main">
+    <h3 class="font-display mb-1">Welcome, {{ name }}</h3>
+    <p class="text-muted-custom mb-4">Here's what's happening across your events today.</p>
+
+    <!-- STAT CARDS -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="stat-card bg-ink">
+          <h6>Total Users</h6>
+          <h3>{{ total_users }}</h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card bg-teal-solid">
+          <h6>Total Events</h6>
+          <h3>{{ total_events }}</h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card bg-signal-solid">
+          <h6>Confirmed Bookings</h6>
+          <h3>{{ total_bookings }}</h3>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="stat-card bg-coral-solid">
+          <h6>Admins / Users</h6>
+          <h3>{{ total_admins }} / {{ total_normal_users }}</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-6">
+        <div class="feature-box">
+          <h6 class="mb-3">User Breakdown</h6>
+          <canvas id="userChart" height="160"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="feature-box">
+          <h6 class="mb-3">Bookings per Event</h6>
+          <canvas id="eventChart" height="160"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- RECENT + MOST BOOKED -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-7">
+        <div class="feature-box h-100">
+          <h6 class="mb-3">Recent Registrations</h6>
+          {% if recent_registrations %}
+          <ul class="list-unstyled mb-0">
+            {% for r in recent_registrations %}
+            <li class="d-flex justify-content-between border-bottom py-2 small">
+              <span><strong>{{ r.name }}</strong> booked {{ r.title }}</span>
+              <span class="text-muted-custom mono">{{ r.booked_at }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="text-muted-custom small mb-0">No bookings yet.</p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="feature-box h-100">
+          <h6 class="mb-3">🏆 Most Booked Event</h6>
+          {% if most_booked %}
+          <p class="mb-1"><strong>{{ most_booked.title }}</strong></p>
+          <p class="text-muted-custom small mb-0">{{ most_booked.booking_count }} bookings</p>
+          {% else %}
+          <p class="text-muted-custom small mb-0">No bookings yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="perforation my-4"></div>
+
+    <!-- USERS TABLE -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="mb-0">Users</h4>
+      <form method="GET" class="d-flex gap-2">
+        <input type="hidden" name="search_event" value="{{ search_event }}">
+        <input type="text" name="search_user" value="{{ search_user }}" placeholder="Search users…" class="form-control table-search">
+        <button class="btn btn-teal btn-sm">Search</button>
+      </form>
+    </div>
+
+    <table class="table table-bordered table-striped" id="usersTable">
+      <thead>
+        <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ user.id }}</td>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>{{ user.role }}</td>
+          <td>
+            {% if user.role != 'admin' %}
+            <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" data-confirm-message="Delete this user?">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-coral btn-sm">Delete</button>
+            </form>
+            {% else %}
+            <span class="badge bg-secondary">Protected</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <nav><ul class="pagination pagination-sm" id="usersPagination"></ul></nav>
+
+    <div class="perforation my-4"></div>
+
+    <!-- EVENTS TABLE -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="mb-0">Events</h4>
+      <form method="GET" class="d-flex gap-2">
+        <input type="hidden" name="search_user" value="{{ search_user }}">
+        <input type="text" name="search_event" value="{{ search_event }}" placeholder="Search events…" class="form-control table-search">
+        <button class="btn btn-teal btn-sm">Search</button>
+      </form>
+    </div>
+
+    <table class="table table-bordered table-striped" id="eventsTable">
+      <thead>
+        <tr><th>ID</th><th>Title</th><th>Date</th><th>Venue</th><th>Bookings</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for event in events %}
+        <tr>
+          <td>{{ event.id }}</td>
+          <td>{{ event.title }}</td>
+          <td class="mono">{{ event.event_date }}</td>
+          <td>{{ event.venue }}</td>
+          <td>{{ event.booking_count }}</td>
+          <td class="d-flex gap-1">
+            <a href="{{ url_for('view_participants', event_id=event.id) }}" class="btn btn-teal btn-sm">View</a>
+            <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-signal btn-sm">Edit</a>
+            <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" data-confirm-message="Delete this event?">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-coral btn-sm">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <nav><ul class="pagination pagination-sm" id="eventsPagination"></ul></nav>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+// ---- Charts ----
+new Chart(document.getElementById('userChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Admins', 'Users'],
+    datasets: [{ data: [{{ total_admins }}, {{ total_normal_users }}], backgroundColor: ['#14213D', '#F2A541'] }]
+  },
+  options: { plugins: { legend: { position: 'bottom' } } }
+});
+
+new Chart(document.getElementById('eventChart'), {
+  type: 'bar',
+  data: {
+    labels: [{% for event in events %}"{{ event.title|truncate(14) }}",{% endfor %}],
+    datasets: [{ label: 'Bookings', data: [{% for event in events %}{{ event.booking_count }},{% endfor %}], backgroundColor: '#0E6E63' }]
+  },
+  options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+});
+
+// ---- Simple client-side pagination (5 rows/page) ----
+function paginateTable(tableId, paginationId, pageSize) {
+  const table = document.getElementById(tableId);
+  const pagination = document.getElementById(paginationId);
+  const rows = Array.from(table.querySelectorAll('tbody tr'));
+  const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
+
+  function showPage(page) {
+    rows.forEach((row, i) => {
+      row.style.display = (i >= (page - 1) * pageSize && i < page * pageSize) ? '' : 'none';
+    });
+    pagination.querySelectorAll('.page-btn').forEach((btn, i) => {
+      btn.classList.toggle('active', i === page - 1);
+    });
+  }
+
+  pagination.innerHTML = '';
+  for (let p = 1; p <= pageCount; p++) {
+    const li = document.createElement('li');
+    li.className = 'page-item';
+    const btn = document.createElement('button');
+    btn.className = 'page-link page-btn';
+    btn.textContent = p;
+    btn.onclick = () => showPage(p);
+    li.appendChild(btn);
+    pagination.appendChild(li);
+  }
+  showPage(1);
+}
+paginateTable('usersTable', 'usersPagination', 5);
+paginateTable('eventsTable', 'eventsPagination', 5);
+</script>
+{% endblock %}
