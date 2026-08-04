@@ -1,217 +1,529 @@
 {% extends "base.html" %}
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Admin Control Center — Eventra{% endblock %}
 
 {% block extra_head %}
 <style>
-  .admin-shell { display: flex; min-height: calc(100vh - 76px); }
-  .admin-main { flex: 1; padding: 30px; background: var(--paper); }
-  .table-search { max-width: 280px; }
-  .page-btn.active { background: var(--signal); color: var(--ink); border-color: var(--signal); }
+  :root {
+    --admin-sidebar-bg: #14213d;
+    --admin-main-bg: rgba(245, 247, 250, 0.95);
+    --admin-card-bg: rgba(255, 255, 255, 0.9);
+    --admin-card-border: rgba(20, 33, 61, 0.08);
+  }
+  body.dark-mode {
+    --admin-sidebar-bg: #0d1527;
+    --admin-main-bg: #101827;
+    --admin-card-bg: rgba(20, 30, 48, 0.85);
+    --admin-card-border: rgba(255, 255, 255, 0.08);
+  }
+
+  .admin-shell {
+    display: flex;
+    min-height: calc(100vh - 76px);
+  }
+  .admin-sidebar {
+    width: 260px;
+    background: var(--admin-sidebar-bg);
+    color: #ffffff;
+    padding: 1.5rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.08);
+  }
+  .admin-main {
+    flex: 1;
+    padding: 2rem 2.5rem;
+    background: var(--admin-main-bg);
+    overflow-x: hidden;
+  }
+
+  .nav-admin-link {
+    color: rgba(255, 255, 255, 0.75);
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    margin-bottom: 0.4rem;
+  }
+  .nav-admin-link:hover, .nav-admin-link.active {
+    color: #ffffff;
+    background: rgba(242, 165, 65, 0.2);
+    border-left: 4px solid var(--signal, #f2a541);
+    transform: translateX(3px);
+  }
+
+  .admin-top-header {
+    background: linear-gradient(135deg, #14213d 0%, #0e6e63 100%);
+    border-radius: 18px;
+    padding: 1.5rem 2rem;
+    color: #ffffff;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 25px rgba(14, 110, 99, 0.2);
+  }
+
+  .admin-avatar-img {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .admin-photo-symbol {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f2a541, #e07a5f);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  .admin-stat-card {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-card-border);
+    border-radius: 16px;
+    padding: 1.4rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+  }
+  .admin-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  }
+
+  .admin-card {
+    background: var(--admin-card-bg);
+    border: 1px solid var(--admin-card-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    margin-bottom: 1.5rem;
+  }
+
+  .table-custom {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .table-custom th {
+    background: rgba(20, 33, 61, 0.05);
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .page-btn.active {
+    background: var(--teal, #0e6e63) !important;
+    color: #ffffff !important;
+    border-color: var(--teal, #0e6e63) !important;
+  }
+
+  .btn-back-header {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.2s ease;
+  }
+  .btn-back-header:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="admin-shell">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar-custom p-3" style="width: 230px;">
-    <h5 class="font-display text-white mb-4">🎟 Admin Panel</h5>
-    <ul class="nav flex-column">
-      <li class="nav-item"><a class="nav-link active" href="{{ url_for('admin') }}">📊 Dashboard</a></li>
-      <li class="nav-item"><a class="nav-link" href="{{ url_for('create_event') }}">➕ Create Event</a></li>
-      <li class="nav-item"><a class="nav-link" href="{{ url_for('view_events') }}">🔍 Browse Events</a></li>
-      <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">🚪 Logout</a></li>
-    </ul>
-  </div>
+  <!-- LEFT SIDEBAR -->
+  <aside class="admin-sidebar">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-4 px-2">
+        <span style="font-size: 1.8rem;">🎟️</span>
+        <div>
+          <h5 class="font-display text-white mb-0 fw-bold">Admin Portal</h5>
+          <span class="badge bg-warning text-dark style-badge" style="font-size: 0.65rem;">System Controller</span>
+        </div>
+      </div>
 
-  <!-- MAIN -->
-  <div class="admin-main">
-    <h3 class="font-display mb-1">Welcome, {{ name }}</h3>
-    <p class="text-muted-custom mb-4">Here's what's happening across your events today.</p>
-
-    <!-- STAT CARDS -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-3">
-        <div class="stat-card bg-ink">
-          <h6>Total Users</h6>
-          <h3>{{ total_users }}</h3>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="stat-card bg-teal-solid">
-          <h6>Total Events</h6>
-          <h3>{{ total_events }}</h3>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="stat-card bg-signal-solid">
-          <h6>Confirmed Bookings</h6>
-          <h3>{{ total_bookings }}</h3>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="stat-card bg-coral-solid">
-          <h6>Admins / Users</h6>
-          <h3>{{ total_admins }} / {{ total_normal_users }}</h3>
-        </div>
-      </div>
+      <nav class="nav flex-column">
+        <a class="nav-admin-link active" href="{{ url_for('admin') }}">
+          📊 <span>Dashboard</span>
+        </a>
+        <a class="nav-admin-link" href="{{ url_for('create_event') }}">
+          ➕ <span>Create Event</span>
+        </a>
+        <a class="nav-admin-link" href="{{ url_for('view_events') }}">
+          🔍 <span>Browse Events</span>
+        </a>
+        <a class="nav-admin-link" href="#usersSection">
+          👥 <span>Users Directory</span>
+        </a>
+        <a class="nav-admin-link" href="#eventsSection">
+          🎟️ <span>Events Roster</span>
+        </a>
+      </nav>
     </div>
 
-    <!-- CHARTS -->
-    <div class="row g-3 mb-4">
-      <div class="col-md-6">
-        <div class="feature-box">
-          <h6 class="mb-3">User Breakdown</h6>
-          <canvas id="userChart" height="160"></canvas>
+    <div class="pt-3 border-top border-secondary border-opacity-25">
+      <div class="d-flex align-items-center gap-2 mb-3 px-2">
+        {% if user and user.profile_image %}
+          <img src="{{ url_for('static', filename='uploads/' ~ user.profile_image) }}" class="rounded-circle" style="width:36px; height:36px; object-fit:cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="profile-photo-symbol" style="width:36px; height:36px; font-size:0.9rem; display:none;">👤</div>
+        {% else %}
+          <div class="profile-photo-symbol" style="width:36px; height:36px; font-size:0.9rem;">👤</div>
+        {% endif %}
+        <div class="text-truncate">
+          <div class="small fw-bold text-white text-truncate">{{ name }}</div>
+          <div class="text-white-50" style="font-size: 0.72rem;">Administrator</div>
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="feature-box">
-          <h6 class="mb-3">Bookings per Event</h6>
-          <canvas id="eventChart" height="160"></canvas>
-        </div>
-      </div>
+      <a class="nav-admin-link text-danger" href="{{ url_for('logout') }}">
+        🚪 <span>Logout</span>
+      </a>
     </div>
+  </aside>
 
-    <!-- RECENT + MOST BOOKED -->
-    <div class="row g-3 mb-4">
+  <!-- MAIN ADMIN CONTENT AREA -->
+  <main class="admin-main">
+
+    <!-- TOP HEADER WITH PROFILE PIC IN TOP RIGHT CORNER & GO BACK BUTTON -->
+    <header class="admin-top-header reveal is-visible">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+        
+        <!-- LEFT: NAVIGATION & TITLE -->
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <!-- GO BACK BUTTON ALWAYS PRESENT -->
+            <a href="javascript:history.back()" class="btn btn-back-header btn-sm rounded-pill px-3 py-1 me-1" title="Go Back">
+              ⬅ Go Back
+            </a>
+            <a href="{{ url_for('home') }}" class="btn btn-back-header btn-sm rounded-pill px-3 py-1 me-2" title="Return to Homepage">
+              🏠 Home
+            </a>
+            <span class="badge bg-light text-dark fw-bold rounded-pill px-3 py-1">Admin Dashboard</span>
+          </div>
+          <h2 class="font-display mb-1 text-white fw-bold">Overview &amp; Management</h2>
+          <p class="text-white-50 mb-0 small">Monitor system statistics, manage users, and curate upcoming events.</p>
+        </div>
+
+        <!-- RIGHT: TOP RIGHT PROFILE PIC WITH PHOTO SYMBOL FALLBACK -->
+        <div class="d-flex align-items-center gap-3 ms-auto">
+          <a href="{{ url_for('edit_profile') }}" class="text-decoration-none" title="Edit Admin Profile">
+            <div class="d-flex align-items-center gap-2">
+              {% if user and user.profile_image %}
+                <img src="{{ url_for('static', filename='uploads/' ~ user.profile_image) }}"
+                     alt="{{ name }}"
+                     class="admin-avatar-img"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="admin-photo-symbol" style="display: none;" title="Admin Photo Symbol">
+                  👤
+                </div>
+              {% else %}
+                <!-- PHOTO SYMBOL EVERY TIME WHEN NO IMAGE -->
+                <div class="admin-photo-symbol" title="Admin Photo Symbol">
+                  👤
+                </div>
+              {% endif %}
+            </div>
+          </a>
+
+          <div class="d-flex flex-column gap-1">
+            <a href="{{ url_for('create_event') }}" class="btn btn-sm btn-warning fw-bold rounded-pill px-3">
+              ➕ New Event
+            </a>
+            <a href="{{ url_for('edit_profile') }}" class="btn btn-sm btn-outline-light rounded-pill px-3">
+              ⚙️ Profile
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- KEY STATS METRICS -->
+    <section class="row g-3 mb-4 reveal is-visible">
+      <div class="col-md-3">
+        <div class="admin-stat-card border-start border-4 border-primary">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted-custom small uppercase fw-bold">Total Users</span>
+              <h3 class="fw-bold mb-0 mt-1">{{ total_users }}</h3>
+            </div>
+            <div style="font-size: 2rem;">👥</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="admin-stat-card border-start border-4 border-success">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted-custom small uppercase fw-bold">Active Events</span>
+              <h3 class="fw-bold mb-0 mt-1">{{ total_events }}</h3>
+            </div>
+            <div style="font-size: 2rem;">📅</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="admin-stat-card border-start border-4 border-warning">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted-custom small uppercase fw-bold">Confirmed Bookings</span>
+              <h3 class="fw-bold mb-0 mt-1">{{ total_bookings }}</h3>
+            </div>
+            <div style="font-size: 2rem;">🎟️</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="admin-stat-card border-start border-4 border-info">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted-custom small uppercase fw-bold">Admins / Users</span>
+              <h3 class="fw-bold mb-0 mt-1">{{ total_admins }} / {{ total_normal_users }}</h3>
+            </div>
+            <div style="font-size: 2rem;">🛡️</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CHARTS & VISUAL ANALYTICS -->
+    <section class="row g-4 mb-4 reveal is-visible">
+      <div class="col-md-6">
+        <div class="admin-card h-100">
+          <h6 class="fw-bold mb-3 font-display">📊 User Roles Breakdown</h6>
+          <canvas id="userChart" height="170"></canvas>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="admin-card h-100">
+          <h6 class="fw-bold mb-3 font-display">📈 Bookings Per Event</h6>
+          <canvas id="eventChart" height="170"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECENT ACTIVITY & HIGHLIGHTS -->
+    <section class="row g-4 mb-5 reveal is-visible">
       <div class="col-md-7">
-        <div class="feature-box h-100">
-          <h6 class="mb-3">Recent Registrations</h6>
+        <div class="admin-card h-100">
+          <h6 class="fw-bold mb-3 font-display">⚡ Recent User Registrations</h6>
           {% if recent_registrations %}
-          <ul class="list-unstyled mb-0">
-            {% for r in recent_registrations %}
-            <li class="d-flex justify-content-between border-bottom py-2 small">
-              <span><strong>{{ r.name }}</strong> booked {{ r.title }}</span>
-              <span class="text-muted-custom mono">{{ r.booked_at }}</span>
-            </li>
-            {% endfor %}
-          </ul>
+            <div class="list-group list-group-flush">
+              {% for r in recent_registrations %}
+                <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0 py-2">
+                  <div>
+                    <strong class="text-primary">{{ r.name }}</strong>
+                    <span class="text-muted-custom small"> booked </span>
+                    <strong class="text-dark">{{ r.title }}</strong>
+                  </div>
+                  <span class="badge bg-light text-dark mono border" style="font-size:0.75rem;">⏱️ {{ r.booked_at }}</span>
+                </div>
+              {% endfor %}
+            </div>
           {% else %}
-          <p class="text-muted-custom small mb-0">No bookings yet.</p>
+            <p class="text-muted-custom small mb-0 py-3 text-center">No recent event bookings found.</p>
           {% endif %}
         </div>
       </div>
       <div class="col-md-5">
-        <div class="feature-box h-100">
-          <h6 class="mb-3">🏆 Most Booked Event</h6>
+        <div class="admin-card h-100 text-center d-flex flex-column justify-content-center">
+          <div style="font-size: 2.8rem;" class="mb-2">🏆</div>
+          <h6 class="text-uppercase text-muted-custom small fw-bold mb-2">Top Booked Event Spotlight</h6>
           {% if most_booked %}
-          <p class="mb-1"><strong>{{ most_booked.title }}</strong></p>
-          <p class="text-muted-custom small mb-0">{{ most_booked.booking_count }} bookings</p>
+            <h4 class="fw-bold text-teal mb-1">{{ most_booked.title }}</h4>
+            <span class="badge bg-success-subtle text-success fs-6 rounded-pill px-4 py-2 mx-auto mt-2">
+              🔥 {{ most_booked.booking_count }} Total Bookings
+            </span>
           {% else %}
-          <p class="text-muted-custom small mb-0">No bookings yet.</p>
+            <p class="text-muted-custom small mb-0">No booking statistics recorded yet.</p>
           {% endif %}
         </div>
       </div>
-    </div>
+    </section>
 
     <div class="perforation my-4"></div>
 
-    <!-- USERS TABLE -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4 class="mb-0">Users</h4>
-      <form method="GET" class="d-flex gap-2">
-        <input type="hidden" name="search_event" value="{{ search_event }}">
-        <input type="text" name="search_user" value="{{ search_user }}" placeholder="Search users…" class="form-control table-search">
-        <button class="btn btn-teal btn-sm">Search</button>
-      </form>
-    </div>
+    <!-- USERS DIRECTORY SECTION -->
+    <section id="usersSection" class="admin-card reveal is-visible">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div>
+          <h4 class="fw-bold mb-0 font-display">👥 Registered Users Directory</h4>
+          <p class="text-muted-custom small mb-0">Manage roles and permissions for registered accounts.</p>
+        </div>
+        <form method="GET" class="d-flex gap-2">
+          <input type="hidden" name="search_event" value="{{ search_event }}">
+          <input type="text" name="search_user" value="{{ search_user }}" placeholder="Search user name or email..." class="form-control form-control-sm" style="width: 250px;">
+          <button class="btn btn-teal btn-sm px-3 rounded-pill">Search</button>
+        </form>
+      </div>
 
-    <table class="table table-bordered table-striped" id="usersTable">
-      <thead>
-        <tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Action</th></tr>
-      </thead>
-      <tbody>
-        {% for user in users %}
-        <tr>
-          <td>{{ user.id }}</td>
-          <td>{{ user.name }}</td>
-          <td>{{ user.email }}</td>
-          <td>{{ user.role }}</td>
-          <td>
-            {% if user.role != 'admin' %}
-            <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" data-confirm-message="Delete this user?">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button type="submit" class="btn btn-coral btn-sm">Delete</button>
-            </form>
-            {% else %}
-            <span class="badge bg-secondary">Protected</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <nav><ul class="pagination pagination-sm" id="usersPagination"></ul></nav>
+      <div class="table-responsive table-custom">
+        <table class="table table-hover align-middle mb-0" id="usersTable">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>User Name</th>
+              <th>Email Address</th>
+              <th>Role</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users %}
+              <tr>
+                <td class="mono font-bold">{{ u.id }}</td>
+                <td class="fw-semibold">
+                  <span class="me-1">👤</span> {{ u.name }}
+                </td>
+                <td class="text-muted-custom">{{ u.email }}</td>
+                <td>
+                  {% if u.role == 'admin' %}
+                    <span class="badge bg-danger rounded-pill px-3">Administrator</span>
+                  {% else %}
+                    <span class="badge bg-secondary rounded-pill px-3">User</span>
+                  {% endif %}
+                </td>
+                <td class="text-end">
+                  {% if u.role != 'admin' %}
+                    <form method="POST" action="{{ url_for('delete_user', user_id=u.id) }}" data-confirm-message="Are you sure you want to delete user '{{ u.name }}'?" class="d-inline">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">Delete</button>
+                    </form>
+                  {% else %}
+                    <span class="badge bg-light text-muted border px-3">Protected</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="d-flex justify-content-end mt-3">
+        <ul class="pagination pagination-sm mb-0" id="usersPagination"></ul>
+      </div>
+    </section>
 
     <div class="perforation my-4"></div>
 
-    <!-- EVENTS TABLE -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4 class="mb-0">Events</h4>
-      <form method="GET" class="d-flex gap-2">
-        <input type="hidden" name="search_user" value="{{ search_user }}">
-        <input type="text" name="search_event" value="{{ search_event }}" placeholder="Search events…" class="form-control table-search">
-        <button class="btn btn-teal btn-sm">Search</button>
-      </form>
-    </div>
+    <!-- EVENTS MANAGEMENT SECTION -->
+    <section id="eventsSection" class="admin-card reveal is-visible">
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div>
+          <h4 class="fw-bold mb-0 font-display">🎟️ Events Management Roster</h4>
+          <p class="text-muted-custom small mb-0">Create, modify, view participants, or remove events.</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{{ url_for('create_event') }}" class="btn btn-signal btn-sm rounded-pill px-3 fw-bold">➕ Create New Event</a>
+          <form method="GET" class="d-flex gap-2">
+            <input type="hidden" name="search_user" value="{{ search_user }}">
+            <input type="text" name="search_event" value="{{ search_event }}" placeholder="Search by event title..." class="form-control form-control-sm" style="width: 220px;">
+            <button class="btn btn-teal btn-sm px-3 rounded-pill">Search</button>
+          </form>
+        </div>
+      </div>
 
-    <table class="table table-bordered table-striped" id="eventsTable">
-      <thead>
-        <tr><th>ID</th><th>Title</th><th>Date</th><th>Venue</th><th>Bookings</th><th>Actions</th></tr>
-      </thead>
-      <tbody>
-        {% for event in events %}
-        <tr>
-          <td>{{ event.id }}</td>
-          <td>{{ event.title }}</td>
-          <td class="mono">{{ event.event_date }}</td>
-          <td>{{ event.venue }}</td>
-          <td>{{ event.booking_count }}</td>
-          <td class="d-flex gap-1">
-            <a href="{{ url_for('view_participants', event_id=event.id) }}" class="btn btn-teal btn-sm">View</a>
-            <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-signal btn-sm">Edit</a>
-            <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" data-confirm-message="Delete this event?">
-              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-              <button type="submit" class="btn btn-coral btn-sm">Delete</button>
-            </form>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <nav><ul class="pagination pagination-sm" id="eventsPagination"></ul></nav>
+      <div class="table-responsive table-custom">
+        <table class="table table-hover align-middle mb-0" id="eventsTable">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Event Title</th>
+              <th>Date</th>
+              <th>Venue</th>
+              <th>Bookings</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for event in events %}
+              <tr>
+                <td class="mono font-bold">{{ event.id }}</td>
+                <td class="fw-bold text-teal">{{ event.title }}</td>
+                <td class="mono small">📅 {{ event.event_date }}</td>
+                <td class="small">📍 {{ event.venue }}</td>
+                <td>
+                  <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3 py-1 fw-bold">
+                    {{ event.booking_count }} Seats
+                  </span>
+                </td>
+                <td class="text-end">
+                  <div class="d-inline-flex gap-1">
+                    <a href="{{ url_for('view_participants', event_id=event.id) }}" class="btn btn-outline-info btn-sm rounded-pill px-2" title="View Bookings">👥 Participants</a>
+                    <a href="{{ url_for('edit_event', event_id=event.id) }}" class="btn btn-outline-primary btn-sm rounded-pill px-2" title="Edit Event">✏️ Edit</a>
+                    <form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" data-confirm-message="Delete event '{{ event.title }}'?" class="d-inline">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-2">🗑️ Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="d-flex justify-content-end mt-3">
+        <ul class="pagination pagination-sm mb-0" id="eventsPagination"></ul>
+      </div>
+    </section>
 
-  </div>
+  </main>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
-// ---- Charts ----
+// ---- Render Charts ----
 new Chart(document.getElementById('userChart'), {
   type: 'doughnut',
   data: {
-    labels: ['Admins', 'Users'],
-    datasets: [{ data: [{{ total_admins }}, {{ total_normal_users }}], backgroundColor: ['#14213D', '#F2A541'] }]
+    labels: ['Admins', 'Regular Users'],
+    datasets: [{
+      data: [{{ total_admins }}, {{ total_normal_users }}],
+      backgroundColor: ['#14213D', '#F2A541'],
+      borderWidth: 2
+    }]
   },
-  options: { plugins: { legend: { position: 'bottom' } } }
+  options: {
+    responsive: true,
+    plugins: { legend: { position: 'bottom' } }
+  }
 });
 
 new Chart(document.getElementById('eventChart'), {
   type: 'bar',
   data: {
-    labels: [{% for event in events %}"{{ event.title|truncate(14) }}",{% endfor %}],
-    datasets: [{ label: 'Bookings', data: [{% for event in events %}{{ event.booking_count }},{% endfor %}], backgroundColor: '#0E6E63' }]
+    labels: [{% for event in events %}"{{ event.title|truncate(12) }}",{% endfor %}],
+    datasets: [{
+      label: 'Bookings',
+      data: [{% for event in events %}{{ event.booking_count }},{% endfor %}],
+      backgroundColor: '#0E6E63',
+      borderRadius: 6
+    }]
   },
-  options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+  }
 });
 
-// ---- Simple client-side pagination (5 rows/page) ----
+// ---- Table Pagination ----
 function paginateTable(tableId, paginationId, pageSize) {
   const table = document.getElementById(tableId);
   const pagination = document.getElementById(paginationId);
+  if (!table || !pagination) return;
+
   const rows = Array.from(table.querySelectorAll('tbody tr'));
   const pageCount = Math.max(1, Math.ceil(rows.length / pageSize));
 
@@ -231,12 +543,16 @@ function paginateTable(tableId, paginationId, pageSize) {
     const btn = document.createElement('button');
     btn.className = 'page-link page-btn';
     btn.textContent = p;
-    btn.onclick = () => showPage(p);
+    btn.onclick = (e) => {
+      e.preventDefault();
+      showPage(p);
+    };
     li.appendChild(btn);
     pagination.appendChild(li);
   }
   showPage(1);
 }
+
 paginateTable('usersTable', 'usersPagination', 5);
 paginateTable('eventsTable', 'eventsPagination', 5);
 </script>

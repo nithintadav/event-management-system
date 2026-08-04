@@ -240,6 +240,9 @@ def dashboard():
     db = get_db()
     cursor = db.cursor(dictionary=True)
 
+    cursor.execute("SELECT id, name, email, phone, profile_image, role FROM users WHERE id=%s", (session["user_id"],))
+    user = cursor.fetchone()
+
     cursor.execute("""
         SELECT events.title, events.event_date, events.event_time, events.venue
         FROM bookings
@@ -272,6 +275,7 @@ def dashboard():
     return render_template(
         "dashboard.html",
         name=session["name"],
+        user=user,
         upcoming_bookings=upcoming_bookings,
         total_bookings=total_bookings,
         total_cancelled=total_cancelled,
@@ -395,12 +399,16 @@ def admin():
     """)
     recent_registrations = cursor.fetchall()
 
+    cursor.execute("SELECT id, name, email, phone, profile_image, role FROM users WHERE id=%s", (session["user_id"],))
+    current_user = cursor.fetchone()
+
     cursor.close()
     db.close()
 
     return render_template(
         "admin.html",
         name=session["name"],
+        user=current_user,
         users=users,
         events=events,
         total_users=total_users,
